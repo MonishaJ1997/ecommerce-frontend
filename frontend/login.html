@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Login</title>
+ <link rel="stylesheet" href="styles.css" />
+
+
+  <style>
+    .login-box { max-width:360px; margin:40px auto; background:white; padding:20px; border-radius:10px; box-shadow: 0 6px 14px rgba(0,0,0,.06); }
+    input { width:100%; padding:10px; margin:10px 0; border-radius:8px; border:1px solid #e5e7eb; }
+    .small { font-size:13px; color:var(--muted); margin-top:6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">My E-Commerce Store</div>
+    <div class="header-right">
+      <a href="index.html">Home</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="login-box">
+      <h3>Login</h3>
+      <input id="username" placeholder="Username" />
+      <input id="password" type="password" placeholder="Password" />
+      <button class="btn" onclick="login()">Login</button>
+      <p class="small">No account? <a href="#" onclick="register()">Register</a></p>
+      <p id="msg" style="color:red;"></p>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    async function login() {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      const res = await fetch("http://127.0.0.1:8000/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("access", data.access);
+        localStorage.setItem("refresh", data.refresh);
+        window.location.href = "index.html";
+      } else {
+        document.getElementById("msg").textContent = "Invalid credentials";
+      }
+    }
+
+    async function register() {
+      const u = prompt("Choose username:");
+      const p = prompt("Choose password (min 6):");
+      if (!u || !p) return alert("Cancelled");
+      const res = await fetch("http://127.0.0.1:8000/api/v1/auth/register/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      if (res.ok) {
+        alert("Registered — now login.");
+      } else {
+        const err = await res.json();
+        alert("Failed: " + JSON.stringify(err));
+      }
+    }
+  </script>
+</body>
+</html>

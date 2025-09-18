@@ -1,0 +1,89 @@
+
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>My E-Commerce Store</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="header-left">My E-Commerce Store</div>
+    <div class="header-right">
+      <a href="cart.html">Cart <span id="cart-count" class="cart-bubble">0</span></a>
+      <a href="login.html" id="login-link">Login</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Products</h2>
+
+    <!-- Filters Section -->
+    <div class="filters">
+      <input type="text" id="search" placeholder="Search products..." />
+      
+      
+
+      
+      
+      <select id="category">
+        <option value="">All Categories</option>
+      </select>
+      
+      <select id="sort">
+        <option value="name">Name A→Z</option>
+        <option value="-name">Name Z→A</option>
+        <option value="price">Price Low→High</option>
+        <option value="-price">Price High→Low</option>
+      </select>
+      <button id="applyFilters">Apply Filters</button>
+    </div>
+
+    <!-- Products Grid -->
+    <div id="products" class="products"></div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <button id="prevPage">Previous</button>
+      <span id="currentPage">1</span>
+      <button id="nextPage">Next</button>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    // Load products on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      updateCartCount();
+
+      // Change login link if logged in
+      const token = localStorage.getItem("access");
+      if (token) document.getElementById("login-link").textContent = "Profile";
+
+      // Initialize categories & products
+      loadCategories();
+      loadProducts();
+    });
+
+    // Event listeners for filters and pagination
+    document.getElementById("applyFilters").addEventListener("click", () => {
+      currentPage = 1;
+      loadProducts();
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+      if (nextPage) {
+        currentPage++;
+        loadProducts();
+      }
+    });
+
+    document.getElementById("prevPage").addEventListener("click", () => {
+      if (prevPage && currentPage > 1) {
+        currentPage--;
+        loadProducts();
+      }
+    });
+  </script>
+</body>
+</html>

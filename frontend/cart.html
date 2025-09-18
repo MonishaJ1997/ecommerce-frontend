@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Cart</title>
+ <link rel="stylesheet" href="styles.css" />
+
+
+  <style>
+    .cart-table { width:100%; border-collapse:collapse; margin-top:18px; }
+    .cart-table th, .cart-table td { padding:12px; border-bottom:1px solid #eee; text-align:left; }
+    .actions { display:flex; gap:8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">My E-Commerce Store</div>
+    <div class="header-right">
+      <a href="index.html">Continue shopping</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h3>Your Cart</h3>
+    <table class="cart-table">
+      <thead>
+        <tr><th>Product</th><th>Qty</th><th>Price</th><th></th></tr>
+      </thead>
+      <tbody id="cart-body"></tbody>
+    </table>
+
+    <div style="margin-top:16px;">
+      <button class="btn btn-place" onclick="placeOrder()">Place Order</button>
+      <p id="msg" style="margin-top:12px;color:green;"></p>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", renderCart);
+
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const tbody = document.getElementById("cart-body");
+      tbody.innerHTML = "";
+      cart.forEach((item, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="display:flex;gap:12px;align-items:center;">
+            <img src="${item.image}" width="64" style="border-radius:6px;">
+            <div>
+              <div style="font-weight:600">${item.name}</div>
+            </div>
+          </td>
+          <td>${item.qty}</td>
+          <td>$${(item.price * item.qty).toFixed(2)}</td>
+          <td><button class="btn btn-remove" onclick="removeFromCart(${idx})">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function removeFromCart(index) {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+      updateCartCount();
+    }
+
+    async function placeOrder() {
+  const token = localStorage.getItem("access");
+  if (!token) {
+    alert("Please login first.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  if (!cart.length) {
+    alert("Cart is empty.");
+    return;
+  }
+
+  // build payload expected by DRF OrderCreateSerializer
+  const payload = {
+    items: cart.map(i => ({
+      product: i.id,     // must be backend product ID
+      quantity: i.qty
+    }))
+  };
+
+  const res = await fetch("http://127.0.0.1:8000/api/v1/orders/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token // or "Token " + token if not JWT
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (res.ok) {
+    localStorage.removeItem("cart");
+    updateCartCount();
+    document.getElementById("msg").textContent = "Order placed successfully!";
+    renderCart();
+  } else {
+    const err = await res.json();
+    console.error("Order error:", err);
+    alert("Failed to place order: " + JSON.stringify(err));
+  }
+}
+
+  </script>
+</body>
+</html>
