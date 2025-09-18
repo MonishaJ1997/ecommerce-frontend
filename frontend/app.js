@@ -1,4 +1,6 @@
-const API_ROOT = "http://127.0.0.1:8000/api/v1";
+// ✅ Correct base URL for production:
+const API_ROOT = "https://ecommerce-backend-arnu.onrender.com/api/v1";
+
 
 let currentPage = 1;
 let nextPage = null;
@@ -265,3 +267,4 @@ async function placeOrder() {
     alert("Error placing order. See console for details.");
   }
 }
+
